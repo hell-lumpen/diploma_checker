@@ -1,0 +1,66 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Byte-compiled in app/
+app/__pycache__/
+app/**/*.py[cod]
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+
+# dotenv
+.env
+.env.*
+
+# IDEs
+.vscode/
+.idea/
+
+# Logs, db, cache
+*.log
+*.sqlite3
+*.db
+*.pid
+
+# Test & lint
+.cache/
+.pytest_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+nosetests.xml
+coverage.xml
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# Docker
+docker-compose.override.yml
+Dockerfile~
+*.seed
+*.bak
+
+# Editor & OS junk
+.DS_Store
+Thumbs.db
+
+# FastAPI static/media (if used)
+static/
+media/
+
+# Logs from app
+app/uvicorn.log
+app/gunicorn.log
+
+# Notebooks
+.ipynb_checkpoints/
