@@ -1,7 +1,9 @@
 import hashlib
+import logging
 from .models import Person
 import js2py
 
+logger = logging.getLogger(__name__)
 
 def sha256_hash(person: Person) -> str:
     namestring = f"{person.lastname} {person.firstname} {person.middlename} {person.birthdate}"
