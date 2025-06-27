@@ -7,7 +7,9 @@ import asyncio
 import httpx
 from .models import Person, DiplomaData
 from .utils import sha256_hash, build_url, js_to_json, extract_diploma_codes_with_js2py, smart_decode
-from .olympiads import OLYMPIADS_BVI_MAI  # Импорт списка олимпиад
+from .olympiads_mai import OLYMPIADS_BVI_MAI  # Импорт списка олимпиад
+from utils import (OLYMPIADS_LOOKUP_MAI, OLYMPIADS_LOOKUP_MIREA, OLYMPIADS_LOOKUP_FIZTEH,
+                   OLYMPIADS_LOOKUP_BAUMAN, OLYMPIADS_LOOKUP_MGU, OLYMPIADS_LOOKUP_MTUSI)
 
 logger = logging.getLogger(__name__)
 
@@ -16,15 +18,12 @@ OA_PATTERN = re.compile(
     r'№(\d+)\.\s*"([^"]+)"\s*\([^"]*"([^"]+)"[^)]*\),\s*(\d+)\s*уровень\.\s*Диплом\s*(\d+)\s*степени\.'
 )
 
-def is_valid_for_mai(olympiad_name: str, speciality: str, level: int) -> bool:
-    """Проверяет, учитывается ли олимпиада в МАИ"""
-    for olympiad in OLYMPIADS_BVI_MAI:
-        # Сравниваем название олимпиады, специальность и уровень
-        if (olympiad["Название олимпиады"] == olympiad_name and 
-            olympiad["Профиль олимпиады"] == speciality and 
-            int(olympiad["Уровень олимпиады"]) == level):
-            return True
-    return False
+def is_valid_for_mai(name: str, speciality: str, level: int) -> bool:
+    """Проверяет олимпиаду по lookup-таблице"""
+    if OLYMPIADS_LOOKUP_MAI is None:
+        raise RuntimeError("Lookup table not initialized!")
+    return (name, speciality, level) in OLYMPIADS_LOOKUP_MAI
+
 
 async def fetch_diplomas_for_year(client: httpx.AsyncClient, year: int, person_hash: str) -> List[DiplomaData]:
     url = build_url(year, person_hash)
@@ -66,7 +65,7 @@ async def fetch_diplomas_for_year(client: httpx.AsyncClient, year: int, person_h
             olympiad_result = int(match.group(5))
             
             # Проверяем, учитывается ли олимпиада в МАИ
-            valid_mai = is_valid_for_mai(olympiad_name, olympiad_speciality, olympiad_level)
+            valid_mai = is_valid_for_mai(olympiad_name, olympiad_speciality)
             
             diplomas.append(DiplomaData(
                 hashed=d.get('hashed'),

@@ -2,10 +2,10 @@ from pydantic import BaseModel, Field
 from datetime import date
 
 class Person(BaseModel):
-    lastname: str = Field(..., example="Иванов")
-    firstname: str = Field(..., example="Иван")
-    middlename: str = Field(..., example="Иванович")
-    birthdate: date = Field(..., example="2005-01-01")
+    lastname: str = Field(..., example="Гавриченко")
+    firstname: str = Field(..., example="Екатерина")
+    middlename: str = Field(..., example="Олеговна")
+    birthdate: date = Field(..., example="2003-11-26")
 
 class DiplomaData(BaseModel):
     hashed: str = Field(..., example="Иванов Иван Иванович 2005-01-01")

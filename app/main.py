@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.models import Person, DiplomaData
 from app.service import get_diplomas_data
 from fastapi import HTTPException
+from utils import init_olympiads_lookup
 
 app = FastAPI(
     title="Проверка дипломов РСОШ",
@@ -25,6 +26,9 @@ app.add_middleware(
 )
 
 logging.basicConfig(level=logging.INFO)
+@app.on_event("startup")
+async def startup_event():
+    init_olympiads_lookup()
 
 @app.get(
     "/health",
