@@ -8,6 +8,11 @@ import httpx
 from .models import Person, DiplomaData
 from .utils import sha256_hash, build_url, js_to_json, extract_diploma_codes_with_js2py, smart_decode
 from .olympiads_mai import OLYMPIADS_BVI_MAI
+from .olympiads_mirea import OLYMPIADS_BVI_MIREA
+from .olympiads_misis import OLYMPIADS_BVI_MISIS
+from .olympiads_bauman import OLYMPIADS_BVI_BAUMAN
+from .olympiads_fizteh import OLYMPIADS_BVI_FIZTEH
+from .olympiads_mgu import OLYMPIADS_BVI_MGU
 
 
 logger = logging.getLogger(__name__)
@@ -25,11 +30,22 @@ def init_olympiads_lookup():
         OLYMPIADS_LOOKUP_MGU, OLYMPIADS_LOOKUP_MISIS, OLYMPIADS_LOOKUP_BAUMAN
 
     OLYMPIADS_LOOKUP_MAI = {
-        (
-            olympiad["Название олимпиады"],
-            olympiad["Профиль олимпиады"]
-        ): True
-        for olympiad in OLYMPIADS_BVI_MAI
+        (olympiad["Название олимпиады"], olympiad["Профиль олимпиады"]): True for olympiad in OLYMPIADS_BVI_MAI
+    }
+    OLYMPIADS_LOOKUP_MIREA = {
+        (olympiad["Название олимпиады"], olympiad["Профиль олимпиады"]): True for olympiad in OLYMPIADS_BVI_MIREA
+    }
+    OLYMPIADS_LOOKUP_MISIS = {
+        (olympiad["Название олимпиады"], olympiad["Профиль олимпиады"]): True for olympiad in OLYMPIADS_BVI_MISIS
+    }
+    OLYMPIADS_LOOKUP_BAUMAN = {
+        (olympiad["Название олимпиады"], olympiad["Профиль олимпиады"]): True for olympiad in OLYMPIADS_BVI_BAUMAN
+    }
+    OLYMPIADS_LOOKUP_FIZTEH = {
+        (olympiad["Название олимпиады"], olympiad["Профиль олимпиады"]): True for olympiad in OLYMPIADS_BVI_FIZTEH
+    }
+    OLYMPIADS_LOOKUP_MGU = {
+        (olympiad["Название олимпиады"], olympiad["Профиль олимпиады"]): True for olympiad in OLYMPIADS_BVI_MGU
     }
 
 # Регулярное выражение для парсинга информации об олимпиаде
@@ -38,24 +54,25 @@ OA_PATTERN = re.compile(
 )
 
 
-def is_valid_for_mai(name: str, speciality: str) -> bool:
-    """Проверяет олимпиаду по lookup-таблице"""
-    if OLYMPIADS_LOOKUP_MAI is None:
-        raise RuntimeError("Lookup table not initialized!")
-    return (name, speciality) in OLYMPIADS_LOOKUP_MAI
-
+def is_valid_for(name: str, speciality: str) -> list:
+    univs = []
+    for univ_name in [OLYMPIADS_LOOKUP_MAI, OLYMPIADS_LOOKUP_MIREA, OLYMPIADS_LOOKUP_MISIS,
+                      OLYMPIADS_LOOKUP_BAUMAN, OLYMPIADS_LOOKUP_FIZTEH, OLYMPIADS_LOOKUP_MGU]:
+        if univ_name is None:
+            raise RuntimeError("Lookup table not initialized!")
+        univs.append((name, speciality) in univ_name)
+    return univs
 
 async def fetch_diplomas_for_year(client: httpx.AsyncClient, year: int, person_hash: str) -> List[DiplomaData]:
     url = build_url(year, person_hash)
     try:
         response = await client.get(url, timeout=5)
+
     except httpx.RequestError as exc:
         logger.error(f"Request failed for {year}: {exc}")
         return []
-
     if response.status_code == 404:
         return []
-
     if response.status_code != 200:
         logger.error(f"Error {response.status_code} for {url}")
         return []
@@ -83,9 +100,8 @@ async def fetch_diplomas_for_year(client: httpx.AsyncClient, year: int, person_h
             olympiad_speciality = match.group(3)
             olympiad_level = int(match.group(4))
             olympiad_result = int(match.group(5))
-            
-            # Проверяем, учитывается ли олимпиада в МАИ
-            valid_mai = is_valid_for_mai(olympiad_name, olympiad_speciality)
+
+            univs = is_valid_for(olympiad_name, olympiad_speciality)
             
             diplomas.append(DiplomaData(
                 hashed=d.get('hashed'),
@@ -96,7 +112,12 @@ async def fetch_diplomas_for_year(client: httpx.AsyncClient, year: int, person_h
                 link=f"https://diploma.rsr-olymp.ru/files/rsosh-diplomas-static/compiled-storage-{year}/by-code/{d.get('code')}/white.pdf",
                 form=d.get('form'),
                 year=year,
-                valid_mai=valid_mai
+                valid_mai=univs[0],
+                valid_mirea=univs[1],
+                valid_misis=univs[2],
+                valid_bauman=univs[3],
+                valid_fizteh=univs[4],
+                valid_mgu=univs[5]
             ))
             
         return diplomas

@@ -17,3 +17,8 @@ class DiplomaData(BaseModel):
     form: int = Field(..., example=11)
     year: int = Field(..., example=2022)
     valid_mai: bool = Field(..., example=True)
+    valid_mirea: bool = Field(..., example=True)
+    valid_misis: bool = Field(..., example=True)
+    valid_bauman: bool = Field(..., example=True)
+    valid_fizteh: bool = Field(..., example=True)
+    valid_mgu: bool = Field(..., example=True)
