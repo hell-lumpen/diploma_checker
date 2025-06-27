@@ -7,22 +7,42 @@ import asyncio
 import httpx
 from .models import Person, DiplomaData
 from .utils import sha256_hash, build_url, js_to_json, extract_diploma_codes_with_js2py, smart_decode
-from .olympiads_mai import OLYMPIADS_BVI_MAI  # Импорт списка олимпиад
-from utils import (OLYMPIADS_LOOKUP_MAI, OLYMPIADS_LOOKUP_MIREA, OLYMPIADS_LOOKUP_FIZTEH,
-                   OLYMPIADS_LOOKUP_BAUMAN, OLYMPIADS_LOOKUP_MGU, OLYMPIADS_LOOKUP_MTUSI)
+from .olympiads_mai import OLYMPIADS_BVI_MAI
+
 
 logger = logging.getLogger(__name__)
+
+OLYMPIADS_LOOKUP_MAI = None
+OLYMPIADS_LOOKUP_MIREA = None
+OLYMPIADS_LOOKUP_FIZTEH = None
+OLYMPIADS_LOOKUP_MGU = None
+OLYMPIADS_LOOKUP_MISIS = None
+OLYMPIADS_LOOKUP_BAUMAN = None
+
+def init_olympiads_lookup():
+    """Инициализирует lookup-таблицы при запуске приложения"""
+    global OLYMPIADS_LOOKUP_MAI, OLYMPIADS_LOOKUP_MIREA, OLYMPIADS_LOOKUP_FIZTEH, \
+        OLYMPIADS_LOOKUP_MGU, OLYMPIADS_LOOKUP_MISIS, OLYMPIADS_LOOKUP_BAUMAN
+
+    OLYMPIADS_LOOKUP_MAI = {
+        (
+            olympiad["Название олимпиады"],
+            olympiad["Профиль олимпиады"]
+        ): True
+        for olympiad in OLYMPIADS_BVI_MAI
+    }
 
 # Регулярное выражение для парсинга информации об олимпиаде
 OA_PATTERN = re.compile(
     r'№(\d+)\.\s*"([^"]+)"\s*\([^"]*"([^"]+)"[^)]*\),\s*(\d+)\s*уровень\.\s*Диплом\s*(\d+)\s*степени\.'
 )
 
-def is_valid_for_mai(name: str, speciality: str, level: int) -> bool:
+
+def is_valid_for_mai(name: str, speciality: str) -> bool:
     """Проверяет олимпиаду по lookup-таблице"""
     if OLYMPIADS_LOOKUP_MAI is None:
         raise RuntimeError("Lookup table not initialized!")
-    return (name, speciality, level) in OLYMPIADS_LOOKUP_MAI
+    return (name, speciality) in OLYMPIADS_LOOKUP_MAI
 
 
 async def fetch_diplomas_for_year(client: httpx.AsyncClient, year: int, person_hash: str) -> List[DiplomaData]:

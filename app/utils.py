@@ -2,16 +2,8 @@ import hashlib
 import logging
 from .models import Person
 import js2py
-from olympiads_mai import OLYMPIADS_BVI_MAI
-
+from .olympiads_mai import OLYMPIADS_BVI_MAI
 logger = logging.getLogger(__name__)
-
-OLYMPIADS_LOOKUP_MAI = None
-OLYMPIADS_LOOKUP_MIREA = None
-OLYMPIADS_LOOKUP_FIZTEH = None
-OLYMPIADS_LOOKUP_MGU = None
-OLYMPIADS_LOOKUP_MTUSI = None
-OLYMPIADS_LOOKUP_BAUMAN = None
 
 def sha256_hash(person: Person) -> str:
     namestring = f"{person.lastname} {person.firstname} {person.middlename} {person.birthdate}"
@@ -52,17 +44,3 @@ def smart_decode(content: bytes) -> str:
     result = chardet.detect(content)
     encoding = result["encoding"] or "utf-8"
     return content.decode(encoding, errors="replace")
-
-
-def init_olympiads_lookup():
-    """Инициализирует lookup-таблицы при запуске приложения"""
-    global OLYMPIADS_LOOKUP_MAI, OLYMPIADS_LOOKUP_MIREA, OLYMPIADS_LOOKUP_FIZTEH, \
-        OLYMPIADS_LOOKUP_MGU, OLYMPIADS_LOOKUP_MTUSI, OLYMPIADS_LOOKUP_BAUMAN
-
-    OLYMPIADS_LOOKUP_MAI = {
-        (
-            olympiad["Название олимпиады"],
-            olympiad["Профиль олимпиады"]
-        ): True
-        for olympiad in OLYMPIADS_BVI_MAI
-    }
