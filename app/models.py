@@ -9,16 +9,7 @@ class Person(BaseModel):
 
 class DiplomaData(BaseModel):
     hashed: str = Field(..., example="Иванов Иван Иванович 2005-01-01")
-    olympiad_name: str = Field(..., example="Санкт-Петербургская астрономическая олимпиада")
-    olympiad_speciality: str = Field(..., example="астрономия")
-    olympiad_level: int = Field(..., example=1)
-    olympiad_result: int = Field(..., example=2)
-    link: str = Field(..., example="https://diploma.rsr-olymp.ru/files/.../white.pdf")
+    oa: str = Field(..., example='№5. "Всероссийская олимпиада школьников по физике", 2 уровень. Диплом 1 степени.')
+    link: str = Field(..., example="https://diploma.rsr-olymp.ru/files/rsosh-diplomas-static/compiled-storage-2022/by-code/1234567890/white.pdf")
     form: int = Field(..., example=11)
     year: int = Field(..., example=2022)
-    valid_mai: bool = Field(..., example=True)
-    valid_mirea: bool = Field(..., example=True)
-    valid_misis: bool = Field(..., example=True)
-    valid_bauman: bool = Field(..., example=True)
-    valid_fizteh: bool = Field(..., example=True)
-    valid_mgu: bool = Field(..., example=True)

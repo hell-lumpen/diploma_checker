@@ -2,7 +2,6 @@ import hashlib
 import logging
 from .models import Person
 import js2py
-from .olympiads_mai import OLYMPIADS_BVI_MAI
 logger = logging.getLogger(__name__)
 
 def sha256_hash(person: Person) -> str:

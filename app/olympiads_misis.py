@@ -1,1 +1,0 @@
-OLYMPIADS_BVI_MISIS = []
